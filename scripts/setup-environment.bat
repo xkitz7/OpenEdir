@@ -1,7 +1,5 @@
 @echo off
-echo =========================
-echo OpenEdir Environment Setup
-echo =========================
+echo ====== OpenEdir Environment Setup ================================================================
 echo.
 
 echo This script helps set up the build environment for OpenEdir.
@@ -13,6 +11,11 @@ echo - Git
 echo - Make
 echo - ISO creation tool (genisoimage, mkisofs, or oscdimg)
 echo.
+
+set /p "test=test? (y/n): "
+if /i "%test%"=="y" (
+    exit
+)
 
 set /p "download=Open dependency download pages? (y/n): "
 if /i "%download%"=="y" (
