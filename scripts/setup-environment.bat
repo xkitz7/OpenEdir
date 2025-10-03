@@ -19,6 +19,7 @@ if '%erorrlevel%' neq '0' (
     powershell.exe -Command "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
+echo(
 
 set /p "test=test? (y/n): "
 if /i "%test%"=="y" (
