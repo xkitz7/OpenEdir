@@ -1,4 +1,4 @@
-@echo off
+z@echo off
 setlocal enabledelayedexpansion
 echo ====== OpenEdir ISO Maker =================================================
 echo.
@@ -15,11 +15,10 @@ if not exist "..\boot" (
     exit /b 1
 )
 
-net file >nul 2>nul
-if '%erorrlevel%' neq '0' (
-    echo _
-    echo(
-    powershell.exe -Command "Start-Process '%~f0' -Verb RunAs"
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Requesting administrator privileges...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
     exit /b
 )
 
