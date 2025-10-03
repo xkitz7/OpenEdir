@@ -1,9 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-
-echo ========================================
-echo    OpenEdir Automated Build System
-echo ========================================
+echo ====== OpenEdir ISO Maker =================================================================================================================================================================================================================================================echo.
 echo.
 
 set "REPO_URL=https://github.com/xkitz7/OpenEdir.git"
@@ -11,7 +8,6 @@ set "BUILD_DIR=..\openedir-build"
 set "ISO_NAME=OpenEdir.iso"
 set "LOG_FILE=build.log"
 
-:: Check if we're in the right directory
 if not exist "..\boot" (
     echo [ERROR] This script should be run from the scripts/ directory
     echo [ERROR] Expected to find ../boot directory
@@ -19,11 +15,18 @@ if not exist "..\boot" (
     exit /b 1
 )
 
-echo [INFO] Starting OpenEdir build process...
+net file >nul 2>nul
+if '%erorrlevel%' neq '0' (
+    echo _
+    echo(
+    powershell.exe -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+echo [INFO] Starting OpenEdir build process, please wait...
 echo [INFO] Build log: %LOG_FILE%
 echo.
 
-:: Run each build step
 call :check_dependencies
 if !errorlevel! neq 0 (
     echo [ERROR] Dependency check failed
@@ -53,10 +56,8 @@ if !errorlevel! neq 0 (
 )
 
 echo.
-echo ========================================
-echo    BUILD SUCCESSFUL!
-echo    ISO Created: %ISO_NAME%
-echo ========================================
+echo [SUCCESS] BUILD SUCCESSFUL!
+echo [INFO] ISO Created: %ISO_NAME%
 echo.
 pause
 exit /b 0
@@ -66,7 +67,6 @@ echo [STEP 1/4] Checking dependencies...
 echo Checking dependencies... > "%LOG_FILE%"
 echo.
 
-:: Check for NASM
 where nasm >nul 2>nul
 if !errorlevel! neq 0 (
     echo [ERROR] NASM not found. Please install NASM assembler
@@ -74,7 +74,6 @@ if !errorlevel! neq 0 (
     goto :install_deps_prompt
 )
 
-:: Check for GCC (MinGW)
 where gcc >nul 2>nul
 if !errorlevel! neq 0 (
     echo [ERROR] GCC not found. Please install MinGW-w64
@@ -82,7 +81,6 @@ if !errorlevel! neq 0 (
     goto :install_deps_prompt
 )
 
-:: Check for git
 where git >nul 2>nul
 if !errorlevel! neq 0 (
     echo [ERROR] Git not found. Please install Git
@@ -90,7 +88,6 @@ if !errorlevel! neq 0 (
     goto :install_deps_prompt
 )
 
-:: Check for make
 where make >nul 2>nul
 if !errorlevel! neq 0 (
     echo [ERROR] Make not found. Please install Make
@@ -99,7 +96,7 @@ if !errorlevel! neq 0 (
 )
 
 echo [SUCCESS] All dependencies found!
-echo NASM, GCC, Git, and Make are available
+echo [INFO] NASM, GCC, Git, and Make are available
 goto :eof
 
 :install_deps_prompt
@@ -133,7 +130,6 @@ if exist "%BUILD_DIR%" (
     )
 )
 
-:: Verify repository structure
 if not exist "%BUILD_DIR%\boot\boot.asm" (
     echo [ERROR] Repository structure invalid - missing boot/boot.asm
     exit /b 1
@@ -168,7 +164,6 @@ if !errorlevel! neq 0 (
 
 echo [INFO] Compiling kernel C files...
 
-:: Compile each C file
 for %%f in (krnl\src\*.c) do (
     echo [INFO] Compiling %%~nf.c...
     gcc -m32 -ffreestanding -nostdlib -nostartfiles -nodefaultlibs -Ikrnl\include -c "%%f" -o "%%~nf.o" >> "..\scripts\%LOG_FILE%" 2>&1
@@ -195,17 +190,14 @@ echo [STEP 4/4] Creating ISO...
 
 cd "%BUILD_DIR%"
 
-:: Create ISO directory structure
 if exist iso rd /s /q iso
 mkdir iso
 mkdir iso\boot
 mkdir iso\boot\grub
 
-:: Copy files to ISO structure
 copy boot.bin iso\boot\ >nul
 copy kernel.bin iso\boot\ >nul
 
-:: Create GRUB configuration
 echo set timeout=0 > iso\boot\grub\grub.cfg
 echo set default=0 >> iso\boot\grub\grub.cfg
 echo. >> iso\boot\grub\grub.cfg
@@ -214,7 +206,6 @@ echo     multiboot /boot/kernel.bin >> iso\boot\grub\grub.cfg
 echo     boot >> iso\boot\grub\grub.cfg
 echo } >> iso\boot\grub\grub.cfg
 
-:: Check for genisoimage or equivalent
 where genisoimage >nul 2>nul
 if !errorlevel! equ 0 (
     echo [INFO] Using genisoimage...
@@ -242,7 +233,6 @@ if !errorlevel! neq 0 (
     exit /b 1
 )
 
-:: Copy ISO to scripts directory
 copy "%ISO_NAME%" "..\scripts\" >nul
 
 echo [SUCCESS] ISO created: %ISO_NAME%
