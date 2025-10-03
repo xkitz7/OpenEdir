@@ -12,14 +12,14 @@ echo - Make
 echo - ISO creation tool (genisoimage, mkisofs, or oscdimg)
 echo.
 
-net file >nul 2>nul
-if '%erorrlevel%' neq '0' (
-    echo _
-    echo(
+NET FILE >NUL 2>NUL
+IF '%ERRORLEVEL%' NEQ '0' (
+    ECHO Requesting administrative privileges...
+    ECHO(
     powershell.exe -Command "Start-Process '%~f0' -Verb RunAs"
-    exit /b
+    EXIT /B
 )
-echo(
+ECHO(
 
 set /p "test=test? (y/n): "
 if /i "%test%"=="y" (
