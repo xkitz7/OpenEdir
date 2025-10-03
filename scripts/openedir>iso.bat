@@ -3,6 +3,13 @@ setlocal enabledelayedexpansion
 echo ====== OpenEdir ISO Maker =================================================
 echo.
 
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Requesting administrator privileges...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
 set "REPO_URL=https://github.com/xkitz7/OpenEdir.git"
 set "BUILD_DIR=..\openedir-build"
 set "ISO_NAME=OpenEdir.iso"
@@ -13,13 +20,6 @@ if not exist "..\boot" (
     echo [ERROR] Expected to find ../boot directory
     pause
     exit /b 1
-)
-
-net session >nul 2>&1
-if %errorLevel% neq 0 (
-    echo Requesting administrator privileges...
-    powershell -Command "Start-Process '%~f0' -Verb RunAs"
-    exit /b
 )
 
 echo [INFO] Starting OpenEdir build process, please wait...
